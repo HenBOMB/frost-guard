@@ -9,21 +9,29 @@
 
   const browser = globalThis.browser ?? globalThis.chrome;
 
+  let secret = null;
+
+  // Listen for the secret token from inject.js (dispatched synchronously at document_start)
+  document.addEventListener('FROST_GUARD_SECRET', (e) => {
+    secret = e.detail;
+    pushConfig();
+  }, { once: true });
+
   // ── Forward config to inject.js ─────────────────────────────────────────
   async function pushConfig() {
+    if (!secret) return;
     try {
       const config = await browser.runtime.sendMessage({ type: 'GET_CONFIG' });
-      window.postMessage({ type: 'FROST_GUARD_CONFIG', config }, '*');
+      window.postMessage({ type: 'FROST_GUARD_CONFIG', config, secret }, '*');
     } catch (_) {
       // Extension context invalidated — ignore
     }
   }
-  pushConfig();
 
   // Listen for config changes from background
   browser.runtime.onMessage.addListener((msg) => {
-    if (msg.type === 'CONFIG_UPDATED') {
-      window.postMessage({ type: 'FROST_GUARD_CONFIG', config: msg.config }, '*');
+    if (msg.type === 'CONFIG_UPDATED' && secret) {
+      window.postMessage({ type: 'FROST_GUARD_CONFIG', config: msg.config, secret }, '*');
     }
   });
 

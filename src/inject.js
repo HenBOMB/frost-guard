@@ -18,6 +18,14 @@
   if (window.__FROST_GUARD_ACTIVE__) return;
   window.__FROST_GUARD_ACTIVE__ = true;
 
+  // Generate a secret handshake token for secure communication with content-script.js
+  const secret = (globalThis.crypto && globalThis.crypto.randomUUID)
+    ? globalThis.crypto.randomUUID()
+    : Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+
+  // Dispatch the secret synchronously to the isolated content script before any page script loads
+  document.dispatchEvent(new CustomEvent('FROST_GUARD_SECRET', { detail: secret }));
+
   // ── Defaults (overridden by config message from content-script) ─────────
   const cfg = {
     enabled: true,
@@ -36,7 +44,9 @@
   window.addEventListener('message', (e) => {
     if (e.source !== window) return;
     if (e.data?.type === 'FROST_GUARD_CONFIG') {
-      Object.assign(cfg, e.data.config);
+      if (e.data.secret === secret) {
+        Object.assign(cfg, e.data.config);
+      }
     }
   });
 
@@ -195,13 +205,14 @@
   const _Worker = window.Worker;
   const _Blob = window.Blob;
 
-  // Defense code injected into every worker
-  const WORKER_DEFENSE = `
+  // Dynamically generate the defense code injected into every worker using current config values
+  function getWorkerDefenseCode() {
+    return `
 (function(){
   if(self.__FROST_GUARD_ACTIVE__)return;
   self.__FROST_GUARD_ACTIVE__=true;
 
-  var _cfg={enabled:true,opfsSizeCapBytes:${cfg.opfsSizeCapBytes},timerJitterUs:${cfg.timerJitterUs}};
+  var _cfg={enabled:${cfg.enabled},opfsSizeCapBytes:${cfg.opfsSizeCapBytes},timerJitterUs:${cfg.timerJitterUs}};
   var _totalBytes=0;
   var _opfsActive=false;
 
@@ -283,17 +294,21 @@
   }
 })();
 `;
+  }
 
   window.Worker = function (source, options) {
-    const sourceStr = String(source);
     const isModule = options?.type === 'module';
 
     try {
+      // Resolve relative URLs to absolute so they load correctly inside the blob worker
+      const absoluteSource = new URL(source, location.href).href;
+
       let wrapper;
+      const workerDefense = getWorkerDefenseCode();
       if (isModule) {
-        wrapper = WORKER_DEFENSE + '\nimport ' + JSON.stringify(sourceStr) + ';\n';
+        wrapper = workerDefense + '\nimport ' + JSON.stringify(absoluteSource) + ';\n';
       } else {
-        wrapper = WORKER_DEFENSE + '\nimportScripts(' + JSON.stringify(sourceStr) + ');\n';
+        wrapper = workerDefense + '\nimportScripts(' + JSON.stringify(absoluteSource) + ');\n';
       }
 
       const blob = new _Blob([wrapper], { type: 'text/javascript' });

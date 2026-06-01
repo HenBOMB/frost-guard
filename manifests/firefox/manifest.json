@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FROST Guard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Protects against FROST — a browser side-channel attack that exploits OPFS-based SSD timing to fingerprint your activity.",
   "permissions": [
     "storage",
@@ -15,15 +15,15 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["inject.js"],
-      "run_at": "document_start",
-      "world": "MAIN"
-    },
-    {
-      "matches": ["<all_urls>"],
       "js": ["content-script.js"],
       "run_at": "document_start",
       "world": "ISOLATED"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["inject.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
     }
   ],
   "action": {
