@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FROST Guard</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <img src="icons/icon48.png" alt="FROST Guard" class="logo">
+        <div>
+          <h1>FROST Guard</h1>
+          <p class="subtitle">SSD Side-Channel Protection</p>
+        </div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="toggle-enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Status -->
+    <div class="status-card" id="status-card">
+      <div class="status-icon" id="status-icon">❄️</div>
+      <div class="status-text">
+        <span class="status-label" id="status-label">Protected</span>
+        <span class="status-detail" id="status-detail">All FROST attack vectors blocked</span>
+      </div>
+    </div>
+
+    <!-- Current Site -->
+    <div class="section">
+      <div class="section-title">Current Site</div>
+      <div class="site-info">
+        <span class="site-origin" id="site-origin">—</span>
+        <span class="site-usage" id="site-usage">0 B used</span>
+      </div>
+    </div>
+
+    <!-- Defense Summary -->
+    <div class="section">
+      <div class="section-title">Active Defenses</div>
+      <div class="defense-list">
+        <div class="defense-item">
+          <span class="defense-icon">📦</span>
+          <span class="defense-name">OPFS Size Cap</span>
+          <span class="defense-value" id="cap-value">512 MB</span>
+        </div>
+        <div class="defense-item">
+          <span class="defense-icon">⏱️</span>
+          <span class="defense-name">Timer Jitter</span>
+          <span class="defense-value" id="jitter-value">±100 µs</span>
+        </div>
+        <div class="defense-item">
+          <span class="defense-icon">🔧</span>
+          <span class="defense-name">Worker Injection</span>
+          <span class="defense-value">Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blocked Events -->
+    <div class="section" id="blocked-section" style="display:none">
+      <div class="section-title alert">⚠️ Blocked Events</div>
+      <div class="blocked-info" id="blocked-info">
+        <span id="blocked-count">0</span> OPFS writes blocked on this origin
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <a href="#" id="options-link">⚙️ Settings</a>
+      <a href="https://github.com" target="_blank" id="info-link">ℹ️ About FROST</a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

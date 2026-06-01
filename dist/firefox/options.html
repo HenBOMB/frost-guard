@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FROST Guard — Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-page">
+    <header class="page-header">
+      <img src="icons/icon48.png" alt="" class="header-logo">
+      <div>
+        <h1>FROST Guard Settings</h1>
+        <p>Configure protection against OPFS-based SSD timing attacks</p>
+      </div>
+    </header>
+
+    <!-- Defense Configuration -->
+    <section class="card">
+      <h2>Defense Configuration</h2>
+
+      <div class="field">
+        <label for="opfs-cap">OPFS Size Cap per Origin</label>
+        <p class="field-help">
+          Maximum bytes a single origin can write to OPFS. Files below this
+          size stay in the OS page cache, preventing SSD contention leakage.
+          <strong>Must be smaller than your system RAM.</strong>
+        </p>
+        <div class="range-row">
+          <input type="range" id="opfs-cap" min="64" max="4096" step="64" value="512">
+          <span class="range-value" id="opfs-cap-value">512 MB</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="timer-jitter">Timer Jitter (µs)</label>
+        <p class="field-help">
+          Random noise added to <code>performance.now()</code> when OPFS is active.
+          The FROST attack requires sub-100µs accuracy; any jitter above that
+          destroys the signal.
+        </p>
+        <div class="range-row">
+          <input type="range" id="timer-jitter" min="0" max="500" step="10" value="100">
+          <span class="range-value" id="timer-jitter-value">±100 µs</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="checkbox-label">
+          <input type="checkbox" id="show-notifications" checked>
+          <span>Show notifications when attacks are blocked</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Allowlist -->
+    <section class="card">
+      <h2>Allowed Origins</h2>
+      <p class="field-help">
+        Sites listed here bypass FROST Guard protections. Only add sites you
+        trust that legitimately need large OPFS storage (e.g., browser-based
+        IDEs, design tools, video editors).
+      </p>
+
+      <div class="allowlist" id="allowlist"></div>
+
+      <div class="add-row">
+        <input type="text" id="add-origin" placeholder="e.g., figma.com" autocomplete="off">
+        <button id="add-btn">Add</button>
+      </div>
+    </section>
+
+    <!-- Usage Monitor -->
+    <section class="card">
+      <h2>OPFS Usage by Origin</h2>
+      <div class="usage-table" id="usage-table">
+        <p class="empty-state">No OPFS activity recorded this session.</p>
+      </div>
+      <button class="btn-secondary" id="clear-usage-btn">Clear All Usage Data</button>
+    </section>
+
+    <!-- About -->
+    <section class="card about">
+      <h2>About FROST Guard</h2>
+      <p>
+        FROST Guard mitigates the <strong>FROST</strong> attack
+        (<em>Fingerprinting Remotely using OPFS-based SSD Timing</em>),
+        a browser side-channel that lets malicious websites spy on your
+        system activity by measuring SSD contention through the Origin
+        Private File System API.
+      </p>
+      <p>
+        <a href="https://gruss.cc" target="_blank">Read the FROST paper →</a>
+      </p>
+    </section>
+
+    <!-- Save -->
+    <div class="save-bar">
+      <span class="save-status" id="save-status"></span>
+      <button class="btn-primary" id="save-btn">Save Settings</button>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
